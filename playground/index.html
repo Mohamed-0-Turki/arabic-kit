@@ -507,9 +507,10 @@
           <h3 id="fn-date">date(value, options?)</h3>
           <p>
             Formats an ISO date string such as <code>2026-09-28</code> or a
-            <code>Date</code>. The default output is the locale-independent
-            <code>YYYY-MM-DD</code> form; <code>month</code> and
-            <code>weekday</code> add localized month and weekday names.
+            <code>Date</code>. The default output keeps the
+            <code>YYYY-MM-DD</code> structure and uses the locale's digits;
+            <code>month</code> and <code>weekday</code> add localized month and
+            weekday names.
           </p>
           <pre><code>date("2026-09-28", { locale: "ar", month: "long" }); // "٢٨ سبتمبر ٢٠٢٦"</code></pre>
 

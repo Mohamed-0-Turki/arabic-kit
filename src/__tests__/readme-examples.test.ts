@@ -73,7 +73,7 @@ describe("README examples", () => {
 
   it("date", () => {
     expect(date("2026-09-28")).toBe("2026-09-28");
-    expect(date("2026-09-28", { locale: "ar" })).toBe("2026-09-28");
+    expect(date("2026-09-28", { locale: "ar" })).toBe("٢٠٢٦-٠٩-٢٨");
     expect(date("2026-09-28", { month: "none" })).toBe("2026-09-28");
     expect(date("2026-09-28", { locale: "ar", month: "long" })).toBe(
       "٢٨ سبتمبر ٢٠٢٦",

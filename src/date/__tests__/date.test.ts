@@ -4,8 +4,43 @@ import { date } from "../formatter.js";
 describe("date", () => {
   it("returns an ISO date by default", () => {
     expect(date("2026-09-28")).toBe("2026-09-28");
-    expect(date("2026-09-28", { locale: "ar" })).toBe("2026-09-28");
+    expect(date("2026-09-28", { locale: "ar" })).toBe("٢٠٢٦-٠٩-٢٨");
     expect(date("2026-09-28", { month: "none" })).toBe("2026-09-28");
+  });
+
+  it("uses Arabic-Indic digits in the ISO form for the Arabic locale", () => {
+    expect(date("2026-09-28", { locale: "ar" })).toBe("٢٠٢٦-٠٩-٢٨");
+    expect(date("2026-09-28", { locale: "ar", month: "none" })).toBe(
+      "٢٠٢٦-٠٩-٢٨",
+    );
+    expect(date("2026-01-05", { locale: "ar" })).toBe("٢٠٢٦-٠١-٠٥");
+  });
+
+  it("keeps Latin digits in the ISO form for the English locale", () => {
+    expect(date("2026-09-28", { locale: "en" })).toBe("2026-09-28");
+    expect(date("2026-01-05", { locale: "en" })).toBe("2026-01-05");
+    expect(date("2026-09-28")).toBe("2026-09-28");
+  });
+
+  it("converts a Date instance to Arabic-Indic digits in the ISO form", () => {
+    expect(date(new Date(2026, 8, 28), { locale: "ar" })).toBe("٢٠٢٦-٠٩-٢٨");
+  });
+
+  it("uses Arabic-Indic digits in a localized Arabic date with a weekday", () => {
+    const formatted = date("2026-09-28", {
+      locale: "ar",
+      month: "long",
+      weekday: true,
+    });
+
+    expect(formatted).toBe("الاثنين، ٢٨ سبتمبر ٢٠٢٦");
+    expect(formatted).toMatch(/[٠-٩]/);
+    expect(formatted).not.toMatch(/[0-9]/);
+  });
+
+  it("keeps the ISO shape, including zero padding, when converting digits", () => {
+    expect(date("2026-01-05", { locale: "ar" })).toBe("٢٠٢٦-٠١-٠٥");
+    expect(date("2024-02-29", { locale: "ar" })).toBe("٢٠٢٤-٠٢-٢٩");
   });
 
   it("accepts a Date instance", () => {

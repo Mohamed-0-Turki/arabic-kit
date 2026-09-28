@@ -1,6 +1,7 @@
 import type { Locale } from "../locale/index.js";
-import { LOCALE_TAGS } from "../locale/index.js";
+import { LOCALE_TAGS, resolveDigitStyle } from "../locale/index.js";
 import type { DateInput, DateOptions, MonthStyle } from "./types.js";
+import { applyDigitStyle } from "../utils/digits.js";
 import { parseDate } from "./parser.js";
 
 const EMPTY = "";
@@ -17,7 +18,10 @@ export const date = (value: DateInput, options: DateOptions = {}): string => {
   }
 
   if (month === "none") {
-    return toIsoDate(parsed);
+    return applyDigitStyle(
+      toIsoDate(parsed),
+      resolveDigitStyle(locale, "auto"),
+    );
   }
 
   return toLocalizedDate(parsed, locale, month, weekday);

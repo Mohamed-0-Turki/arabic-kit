@@ -214,8 +214,11 @@ thing the package does support.
   exists.
 - **`digits()` does not normalise separators.** `digits("١٬٠٠٠", "latin")` is `"1٬000"`. Number
   formatting belongs to `number()`.
-- **`date("…")` with no `month` is deliberately locale-independent.** Do not shape its digits or
-  localize it; the ISO form exists to be stored and submitted.
+- **`date("…")` with no `month` keeps the ISO shape but follows the locale's digits.** The structure
+  stays `YYYY-MM-DD` with zero padding, and the digits are converted with `applyDigitStyle` via
+  `resolveDigitStyle(locale, "auto")`, so `date("2026-09-28", { locale: "ar" })` is `"٢٠٢٦-٠٩-٢٨"`.
+  Do not localize the structure itself, and do not convert digits on the passthrough path: an
+  unparsable input is still returned unchanged.
 - **Dates are parsed as local calendar dates.** Do not switch to `new Date(value)`, which parses
   `"2026-09-28"` as UTC and shifts the day for negative UTC offsets.
 - **The README is not a substitute for tests.** If you change behaviour, the README examples and

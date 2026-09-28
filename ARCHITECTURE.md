@@ -448,9 +448,10 @@ normalising a number is `number()`'s job, and blurring the two is how `"1٬000"`
 
 **`digits: "auto"` resolves from the locale, and only `number` and `time` have it.** Number and Time
 render their own digits, so a forced style is meaningful for both. Date either returns the
-locale-independent `YYYY-MM-DD` (which must stay machine-readable) or delegates month names to
-`Intl.DateTimeFormat`, which already owns the digit style — an option there would be a second way to
-say one thing. `digits` is not given an option either, per the rule above.
+`YYYY-MM-DD` form with its digits converted through `applyDigitStyle` and
+`resolveDigitStyle(locale, "auto")`, or delegates month names to `Intl.DateTimeFormat`, which already
+owns the digit style — an option there would be a second way to say one thing. `digits` is not given
+an option either, per the rule above.
 
 **Options objects, not positional booleans.** The legacy functions took `(value, lang, a, b, c)`.
 Positional booleans are unreadable at the call site and impossible to extend without breaking

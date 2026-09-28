@@ -277,23 +277,23 @@ number(1000, { locale: "en", group: true }); // "1,000"
 | `month`   | `"none" \| "short" \| "long"` | `"none"` | `"none"` returns `YYYY-MM-DD`; the others render the month name. |
 | `weekday` | `boolean`                     | `false`  | Prepend the weekday name. Only applies when `month` is a name.   |
 
-### The ISO form is locale-independent by design
+### The ISO form keeps its shape, and the digits follow the locale
 
-With the default `month: "none"`, `date()` returns the calendar date and nothing else. It does not
-apply the locale, and it does not shape the digits — even for `locale: "ar"`. That is intentional:
-this output exists to be stored, compared, submitted and parsed, so it must be identical no matter
-where it is rendered.
+With the default `month: "none"`, `date()` returns the calendar date and nothing else. The structure
+is always the same `YYYY-MM-DD` with zero padding, and the digits follow the locale's digit system:
+`locale: "ar"` gives Arabic-Indic digits, `locale: "en"` gives Latin ones.
 
 ```ts
 date("2026-09-28"); // "2026-09-28"
-date("2026-09-28", { locale: "ar" }); // "2026-09-28"  ← still Latin digits
+date("2026-09-28", { locale: "ar" }); // "٢٠٢٦-٠٩-٢٨"  ← Arabic-Indic digits
+date("2026-09-28", { locale: "en" }); // "2026-09-28"
 date("2026-09-28", { month: "none" }); // "2026-09-28"
 
 date("2026-09-28", { locale: "ar", month: "long" }); // "٢٨ سبتمبر ٢٠٢٦"  ← localized + Arabic digits
 ```
 
-Ask for a month name when you want a date a human reads, and leave `month` alone when you want a
-date a machine reads.
+Ask for a month name when you want a date a human reads, and leave `month` alone when you want the
+`YYYY-MM-DD` structure for storage, comparison or form submission.
 
 ```ts
 date("2026-09-28", { locale: "ar", month: "long" }); // "٢٨ سبتمبر ٢٠٢٦"
