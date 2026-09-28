@@ -239,6 +239,47 @@ without them rather than with placeholder URLs.
 
 ---
 
+## The playground site
+
+`playground/` is a static page that calls the built package in the browser. It is published to
+GitHub Pages by `.github/workflows/deploy-pages.yml`, which runs on every push to `main`:
+
+1. `npm ci` and `npm run build`
+2. `node .github/scripts/assemble-pages.mjs` writes `.pages-out/`, containing `dist/`, the
+   playground page, `index.html` and `404.html` (both the site-root redirect) and `.nojekyll`
+3. `actions/upload-pages-artifact` and `actions/deploy-pages` publish it
+
+To test the exact site locally:
+
+```bash
+npm run build
+node .github/scripts/assemble-pages.mjs
+npx http-server .pages-out -p 8080
+```
+
+`.pages-out/` is generated; it is ignored by git, Prettier and ESLint.
+
+### One-time setup
+
+The workflow cannot create the Pages site by itself. `actions/configure-pages` can only enable
+Pages when it is given a token other than the default `GITHUB_TOKEN`, so a maintainer must enable it
+once under **Settings → Pages → Build and deployment → Source: GitHub Actions**. Until that is done,
+the `Configure Pages` step fails and the site returns 404.
+
+### URL layout
+
+| URL                               | Serves                                      |
+| --------------------------------- | ------------------------------------------- |
+| `/`                               | `index.html`, a redirect to the playground  |
+| `/playground/`                    | the playground page                         |
+| `/playground` (no trailing slash) | `404.html`, the same redirect               |
+| `/dist/…`                         | the built package, loaded by the import map |
+
+The playground must keep using a **relative** import map target (`../dist/index.js`). An absolute
+`/dist/index.js` resolves to the domain root and breaks under `https://<user>.github.io/<repo>/`.
+
+---
+
 ## Troubleshooting
 
 | Problem                                         | Fix                                                                                                                                                         |

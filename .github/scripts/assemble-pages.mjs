@@ -1,4 +1,4 @@
-import { access, cp, mkdir, rm } from "node:fs/promises";
+import { access, cp, mkdir, rm, writeFile } from "node:fs/promises";
 
 const out = ".pages-out";
 const path = "playground/";
@@ -26,5 +26,8 @@ await cp(`${path}index.html`, `${out}/${path}index.html`);
 await cp(`${path}playground.js`, `${out}/${path}playground.js`);
 await cp("public/404.html", `${out}/404.html`);
 await cp("public/404.html", `${out}/index.html`);
+await writeFile(`${out}/.nojekyll`, "");
 
-console.log(`Assembled ${out}/: dist/, ${path}, index.html, 404.html`);
+console.log(
+  `Assembled ${out}/: dist/, ${path}, index.html, 404.html, .nojekyll`,
+);
