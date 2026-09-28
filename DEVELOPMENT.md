@@ -239,14 +239,15 @@ without them rather than with placeholder URLs.
 
 ---
 
-## The playground site
+## The site
 
-`playground/` is a static page that calls the built package in the browser. It is published to
-GitHub Pages by `.github/workflows/deploy-pages.yml`, which runs on every push to `main`:
+The repository root **is** the site. `index.html`, `style.css` and `playground.js` sit at the root
+and call the built package in the browser. `.github/workflows/deploy-pages.yml` publishes them on
+every push to `main`:
 
 1. `npm ci` and `npm run build`
-2. `node .github/scripts/assemble-pages.mjs` writes `.pages-out/`, containing `index.html` (the
-   playground page itself), `playground.js`, `dist/`, `404.html` and `.nojekyll`
+2. `node .github/scripts/assemble-pages.mjs` copies `index.html`, `style.css`, `playground.js` and
+   `dist/` into `.pages-out/`, plus `.nojekyll`
 3. `actions/upload-pages-artifact` and `actions/deploy-pages` publish it
 
 To test the exact site locally:
@@ -257,7 +258,8 @@ node .github/scripts/assemble-pages.mjs
 npx http-server .pages-out -p 8080
 ```
 
-`.pages-out/` is generated; it is ignored by git, Prettier and ESLint.
+`.pages-out/` is generated; it is ignored by git, Prettier and ESLint. The site files themselves are
+**not** part of the npm package: `package.json` publishes only `dist`, `README.md` and `LICENSE`.
 
 ### One-time setup
 
@@ -267,24 +269,21 @@ once under **Settings → Pages → Build and deployment → Source: GitHub Acti
 the `Configure Pages` step fails and the site returns 404.
 
 This setting must stay on **GitHub Actions**. If it is switched to **Deploy from a branch**, Pages
-serves a Jekyll build of `main` instead of the workflow artifact: the root becomes GitHub's generated
-README page and `dist/` is missing, because it is gitignored and so cannot exist in a branch build.
-The workflow still reports success in that state, so check the served page, not just the run.
+serves a Jekyll build of `main` instead of the workflow artifact. `index.html` still renders, but
+`dist/` is missing — it is gitignored, so it cannot exist in a branch build — and the playground
+therefore cannot load the package. The workflow still reports success in that state, so check the
+served page, not just the run.
 
 ### URL layout
 
-| URL              | Serves                                                     |
-| ---------------- | ---------------------------------------------------------- |
-| `/`              | `index.html`, the playground — the site homepage           |
-| `/dist/…`        | the built package, loaded by the import map                |
-| `/playground/…`  | nothing; the playground is only published at the site root |
-| any unknown path | `404.html`, which redirects to `./` (the homepage)         |
+| URL       | Serves                                           |
+| --------- | ------------------------------------------------ |
+| `/`       | `index.html`, the playground — the site homepage |
+| `/dist/…` | the built package, loaded by the import map      |
 
-The page is authored in `playground/`, where the built package sits at `../dist/`, and the assembly
-step publishes it at the site root, where it sits at `./dist/`. That single import map rewrite is
-asserted by `assemble-pages.mjs`, which fails if the map is missing, duplicated, or if the page still
-contains an absolute `/playground/` URL. The target must stay **relative**: an absolute
-`/dist/index.js` resolves to the domain root and breaks under `https://<user>.github.io/<repo>/`.
+There is no `/playground/` route and no redirect page. All asset references in `index.html` are
+**relative** (`./style.css`, `./playground.js`, `./dist/index.js`): an absolute `/dist/index.js`
+resolves to the domain root and breaks under `https://<user>.github.io/<repo>/`.
 
 ---
 
