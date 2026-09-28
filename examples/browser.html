@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>arabic-kit — browser example</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0 auto;
+        max-width: 40rem;
+        padding: 2rem 1rem;
+        line-height: 1.7;
+      }
+      h1 {
+        font-size: 1.25rem;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #ddd;
+        padding: 0.5rem;
+        text-align: right;
+      }
+      input {
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+        font: inherit;
+        padding: 0.5rem;
+        width: 100%;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "arabic-kit": "/dist/index.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <h1>arabic-kit — تقرير الطلبات</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>المرجع</th>
+          <th>الإجمالي</th>
+          <th>الوقت</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <h2>إدخال الرقم الوطني</h2>
+    <input
+      id="national-id"
+      inputmode="numeric"
+      placeholder="أدخل الرقم الوطني"
+    />
+    <p id="preview"></p>
+
+    <script type="module">
+      import { date, digits, number, time } from "arabic-kit";
+
+      const locale = "ar";
+      const orders = [
+        { id: "ORD-2026-00412", total: 8490, createdAt: "14:05" },
+        { id: "ORD-2026-00413", total: 1290.5, createdAt: "18:30" },
+      ];
+
+      const rows = orders.map((order) => {
+        const total = number(order.total, { locale, group: true });
+        const at = time(order.createdAt, { locale, hour12: true });
+
+        return `<tr><td>${order.id}</td><td>${total}</td><td>${at}</td></tr>`;
+      });
+
+      rows.push(
+        `<tr><td colspan="3">${date("2026-09-28", { locale, month: "long" })}</td></tr>`,
+      );
+
+      document.getElementById("rows").innerHTML = rows.join("");
+
+      const input = document.getElementById("national-id");
+      const preview = document.getElementById("preview");
+
+      input.addEventListener("input", () => {
+        const latin = digits(input.value, "latin");
+        const cleaned = latin.replace(/\D/g, "").slice(0, 10);
+
+        preview.textContent = cleaned ? number(cleaned, { locale }) : "—";
+      });
+    </script>
+  </body>
+</html>
