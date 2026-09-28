@@ -245,8 +245,8 @@ without them rather than with placeholder URLs.
 GitHub Pages by `.github/workflows/deploy-pages.yml`, which runs on every push to `main`:
 
 1. `npm ci` and `npm run build`
-2. `node .github/scripts/assemble-pages.mjs` writes `.pages-out/`, containing `dist/`, the
-   playground page, `index.html` and `404.html` (both the site-root redirect) and `.nojekyll`
+2. `node .github/scripts/assemble-pages.mjs` writes `.pages-out/`, containing `index.html` (the
+   playground page itself), `playground.js`, `dist/`, `404.html` and `.nojekyll`
 3. `actions/upload-pages-artifact` and `actions/deploy-pages` publish it
 
 To test the exact site locally:
@@ -266,27 +266,36 @@ Pages when it is given a token other than the default `GITHUB_TOKEN`, so a maint
 once under **Settings → Pages → Build and deployment → Source: GitHub Actions**. Until that is done,
 the `Configure Pages` step fails and the site returns 404.
 
+This setting must stay on **GitHub Actions**. If it is switched to **Deploy from a branch**, Pages
+serves a Jekyll build of `main` instead of the workflow artifact: the root becomes GitHub's generated
+README page and `dist/` is missing, because it is gitignored and so cannot exist in a branch build.
+The workflow still reports success in that state, so check the served page, not just the run.
+
 ### URL layout
 
-| URL                               | Serves                                      |
-| --------------------------------- | ------------------------------------------- |
-| `/`                               | `index.html`, a redirect to the playground  |
-| `/playground/`                    | the playground page                         |
-| `/playground` (no trailing slash) | `404.html`, the same redirect               |
-| `/dist/…`                         | the built package, loaded by the import map |
+| URL              | Serves                                                     |
+| ---------------- | ---------------------------------------------------------- |
+| `/`              | `index.html`, the playground — the site homepage           |
+| `/dist/…`        | the built package, loaded by the import map                |
+| `/playground/…`  | nothing; the playground is only published at the site root |
+| any unknown path | `404.html`, which redirects to `./` (the homepage)         |
 
-The playground must keep using a **relative** import map target (`../dist/index.js`). An absolute
+The page is authored in `playground/`, where the built package sits at `../dist/`, and the assembly
+step publishes it at the site root, where it sits at `./dist/`. That single import map rewrite is
+asserted by `assemble-pages.mjs`, which fails if the map is missing, duplicated, or if the page still
+contains an absolute `/playground/` URL. The target must stay **relative**: an absolute
 `/dist/index.js` resolves to the domain root and breaks under `https://<user>.github.io/<repo>/`.
 
 ---
 
 ## Troubleshooting
 
-| Problem                                         | Fix                                                                                                                                                         |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module '@/constants/...'`          | Path aliases are not part of this project. Use relative imports with the `.js` extension (`../utils/digits.js`) — required by `moduleResolution: nodenext`. |
-| A test fails only on CI                         | Check the Node/ICU version: Arabic month and weekday names come from ICU data. Node 18+ ships full ICU.                                                     |
-| `tsc` emits test files into `dist/`             | `tsconfig.build.json` must keep `"exclude": ["src/**/__tests__/**"]`.                                                                                       |
-| ESLint: "not found by the project service"      | The file is outside `tsconfig.json`'s `include`, which is `["src"]`. Move it into `src/`, or extend `include`.                                              |
-| Arabic text looks scrambled in a diff or editor | This is Unicode bidi, not corruption. The tests assert exact code points; trust the tests.                                                                  |
-| `npm run clean` fails on Windows                | The script uses `node -e`, which works in cmd and PowerShell. Do not replace it with `rm -rf`.                                                              |
+| Problem                                                     | Fix                                                                                                                                                                                                          |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Site root shows GitHub's README page, `/dist/index.js` 404s | The Pages source was switched to **Deploy from a branch**, so Pages serves a Jekyll build of `main` and the gitignored `dist/` is absent. Set the source back to **GitHub Actions** and re-run the workflow. |
+| `Cannot find module '@/constants/...'`                      | Path aliases are not part of this project. Use relative imports with the `.js` extension (`../utils/digits.js`) — required by `moduleResolution: nodenext`.                                                  |
+| A test fails only on CI                                     | Check the Node/ICU version: Arabic month and weekday names come from ICU data. Node 18+ ships full ICU.                                                                                                      |
+| `tsc` emits test files into `dist/`                         | `tsconfig.build.json` must keep `"exclude": ["src/**/__tests__/**"]`.                                                                                                                                        |
+| ESLint: "not found by the project service"                  | The file is outside `tsconfig.json`'s `include`, which is `["src"]`. Move it into `src/`, or extend `include`.                                                                                               |
+| Arabic text looks scrambled in a diff or editor             | This is Unicode bidi, not corruption. The tests assert exact code points; trust the tests.                                                                                                                   |
+| `npm run clean` fails on Windows                            | The script uses `node -e`, which works in cmd and PowerShell. Do not replace it with `rm -rf`.                                                                                                               |
