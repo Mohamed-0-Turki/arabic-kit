@@ -5,7 +5,7 @@ const typescriptFiles = ["**/*.ts"];
 
 export default tseslint.config(
   {
-    ignores: ["dist/**", "coverage/**", "node_modules/**"],
+    ignores: ["dist/**", "coverage/**", "node_modules/**", ".pages-out/**"],
   },
   ...tseslint.configs.recommendedTypeChecked.map((config) => ({
     ...config,

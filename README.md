@@ -20,8 +20,19 @@ stretch("مرحبا", 2); // "مــرحــبــا"
 
 ---
 
+## Try it in the playground
+
+**[Try arabic-kit in the interactive playground →](https://mohamed-0-turki.github.io/arabic-kit/)**
+
+Format an input and copy the code that produced it, in your browser, with nothing to install and
+nothing to build. The playground exercises all five functions — `number()`, `digits()`, `date()`,
+`time()` and `stretch()` — against the same build published to npm.
+
+---
+
 ## Table of contents
 
+- [Try it in the playground](#try-it-in-the-playground)
 - [What is arabic-kit?](#what-is-arabic-kit)
 - [Installation](#installation)
 - [Quick start](#quick-start)

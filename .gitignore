@@ -1,6 +1,7 @@
 node_modules
 dist
 coverage
+.pages-out
 *.log
 *.tgz
 .DS_Store
